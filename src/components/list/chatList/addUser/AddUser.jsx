@@ -5,86 +5,77 @@ import { arrayUnion, collection, doc, getDocs, query, serverTimestamp, setDoc, u
 import { useUserStore } from "../../../../lib/userStore";
 
 const AddUser = () => {
-
-  const [user,setUser] = useState(null)
-  const {currentUser} = useUserStore()
+  const [user, setUser] = useState(null);
+  const { currentUser } = useUserStore();
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target)
-    const username = formData.get("username")
+    const formData = new FormData(e.target);
+    const username = formData.get("username");
 
-    try{
+    try {
       const userRef = collection(db, "users");
-      // Create a query against the collection.
       const q = query(userRef, where("username", "==", username));
+      const querySnapShot = await getDocs(q);
 
-      const querySnapShot = await getDocs(q)
-
-      if(!querySnapShot.empty){
+      if (!querySnapShot.empty) {
         setUser(querySnapShot.docs[0].data());
       }
-
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
-
-  const handleAdd = async () =>{
+  const handleAdd = async () => {
     const chatRef = collection(db, "chats");
     const userChatsRef = collection(db, "userchats");
 
-
-    try{
-
+    try {
       const newChatRef = doc(chatRef);
-
-      await setDoc(newChatRef,{
+      await setDoc(newChatRef, {
         createdAt: serverTimestamp(),
-        message: [],
-      })
-      // console.log(newChatRef.id)
+        messages: [],
+      });
 
-      await updateDoc(doc(userChatsRef, user.id),{
-        chats:arrayUnion({
+      await updateDoc(doc(userChatsRef, user.id), {
+        chats: arrayUnion({
           chatId: newChatRef.id,
-          lastMessage:"",
+          lastMessage: "",
           receiverId: currentUser.id,
-          updatedAt:Date.now(),
-
-        })
+          updatedAt: Date.now(),
+        }),
       });
-      await updateDoc(doc(userChatsRef, currentUser.id),{
-        chats:arrayUnion({
+
+      await updateDoc(doc(userChatsRef, currentUser.id), {
+        chats: arrayUnion({
           chatId: newChatRef.id,
-          lastMessage:"",
+          lastMessage: "",
           receiverId: user.id,
-          updatedAt:Date.now(),
-
-        })
+          updatedAt: Date.now(),
+        }),
       });
-
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   return (
     <div className="addUser">
-        <form onSubmit={handleSearch}>
-            <input type="text" placeholder="Username" name="username"/>
-            <button>Search</button>
-        </form>
-       {user && <div className="user">
-            <div className="detail">
-                <img src={user.avatar || "./avatar.png"} />
-                <span>{user.username}</span>
-            </div>
-            <button onClick={handleAdd}>Add User</button>
-        </div>} 
+      <form onSubmit={handleSearch}>
+        <input type="text" placeholder="Username" name="username" />
+        <button>Search</button>
+      </form>
+      {user && (
+        <div className="user">
+          <div className="detail">
+            <img src={user.avatar || "./avatar.png"} alt="" />
+            <span>{user.username}</span>
+          </div>
+          <button onClick={handleAdd}>Add User</button>
+        </div>
+      )}
     </div>
   )
-}
+};
 
 export default AddUser;
