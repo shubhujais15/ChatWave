@@ -69,3 +69,29 @@
         background-color: #dddddd35;
     }
 }
+
+h2{
+    font-weight: 200;
+    font-style: oblique;
+}
+
+.header {
+    position: absolute;
+    top: 30px;
+    left: 30px; 
+    display: flex;
+  }
+  
+  .header h2 {
+    margin: 0;
+    font-size: 40px;
+    font-family: monospace;
+
+    color: black;
+  }
+
+  .header img{
+    margin-left: 20px;
+    width: 50px;
+    height: 50px;
+  }
